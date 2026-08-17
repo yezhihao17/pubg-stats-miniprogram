@@ -1,0 +1,189 @@
+<!-- pages/stats/stats.wxml -->
+<view class="container">
+  <!-- 玩家信息头 -->
+  <view class="player-header">
+    <view class="player-avatar-lg">
+      <text class="avatar-text">{{playerInitial}}</text>
+    </view>
+    <view class="player-meta">
+      <text class="player-name-lg">{{playerName}}</text>
+      <text class="player-platform">{{platformLabel}}</text>
+      <text class="player-extra">🆔 {{playerId.slice(0,16)}}... | 生涯 {{summary.kdRatio}} K/D</text>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text>加载数据中...</text>
+  </view>
+
+  <!-- 错误提示 -->
+  <view class="error-toast" wx:if="{{error}}">
+    <text>{{error}}</text>
+  </view>
+
+  <block wx:if="{{!loading}}">
+    <!-- 赛季选择器 -->
+    <view class="season-picker" wx:if="{{seasonList.length > 0}}">
+      <text class="picker-label">赛季</text>
+      <picker
+        mode="selector"
+        range="{{seasonList}}"
+        range-key="label"
+        value="{{currentSeasonIndex}}"
+        bindchange="onSeasonChange"
+      >
+        <view class="picker-box">
+          <text class="picker-text">{{seasonList[currentSeasonIndex].label}}</text>
+          <text class="picker-badge" wx:if="{{seasonList[currentSeasonIndex].isCurrent}}">当前</text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 生涯概要（4项：设计稿要求） -->
+    <view class="career-summary" wx:if="{{summary}}">
+      <view class="cs-item highlight">
+        <text class="cs-value">{{summary.kdRatio}}</text>
+        <text class="cs-label">K/D</text>
+      </view>
+      <view class="cs-item">
+        <text class="cs-value">{{summary.roundsPlayed}}</text>
+        <text class="cs-label">总场次</text>
+      </view>
+      <view class="cs-item">
+        <text class="cs-value">{{summary.wins}}</text>
+        <text class="cs-label">吃鸡</text>
+      </view>
+      <view class="cs-item">
+        <text class="cs-value">{{summary.winRate}}%</text>
+        <text class="cs-label">胜率</text>
+      </view>
+    </view>
+
+    <!-- 赛季数据加载中 -->
+    <view class="loading" wx:if="{{seasonLoading}}">
+      <view class="loading-spinner"></view>
+      <text>加载赛季数据...</text>
+    </view>
+
+    <block wx:if="{{!seasonLoading}}">
+      <!-- 本赛季概要 -->
+      <view class="section-label" wx:if="{{currentSeasonSummary}}">📈 当前赛季</view>
+      <view class="summary-row" wx:if="{{currentSeasonSummary}}">
+        <view class="summary-item">
+          <text class="summary-value">{{currentSeasonSummary.kdRatio}}</text>
+          <text class="summary-label">K/D</text>
+        </view>
+        <view class="summary-item">
+          <text class="summary-value">{{currentSeasonSummary.avgDamage}}</text>
+          <text class="summary-label">场均伤害</text>
+        </view>
+        <view class="summary-item">
+          <text class="summary-value">{{currentSeasonSummary.winRate}}%</text>
+          <text class="summary-label">胜率</text>
+        </view>
+        <view class="summary-item">
+          <text class="summary-value">{{currentSeasonSummary.roundsPlayed}}</text>
+          <text class="summary-label">总场次</text>
+        </view>
+        <view class="summary-item">
+          <text class="summary-value">{{currentSeasonSummary.avgKills}}</text>
+          <text class="summary-label">场均击杀</text>
+        </view>
+      </view>
+
+      <!-- 双层 Tab -->
+      <view class="type-tabs" wx:if="{{currentModeData}}">
+        <view class="type-tab {{typeTab === 'normal' ? 'active' : ''}}" data-type="normal" bindtap="onTypeTabChange">🎯 匹配</view>
+        <view class="type-tab {{typeTab === 'ranked' ? 'active' : ''}}" data-type="ranked" bindtap="onTypeTabChange">🏆 排位</view>
+      </view>
+
+      <view class="mode-tabs" wx:if="{{currentModeData}}">
+        <view class="mode-tab {{modeTab === 'solo' ? 'active' : ''}}" data-mode="solo" bindtap="onModeTabChange">单排</view>
+        <view class="mode-tab {{modeTab === 'duo' ? 'active' : ''}}" data-mode="duo" bindtap="onModeTabChange">双排</view>
+        <view class="mode-tab {{modeTab === 'squad' ? 'active' : ''}}" data-mode="squad" bindtap="onModeTabChange">四排</view>
+      </view>
+
+      <!-- 当前 Tab 数据详情 -->
+      <view class="detail-card" wx:if="{{currentModeData}}">
+        <view class="detail-card-title">{{currentModeData.typeLabel}} · {{currentModeData.modeLabel}}</view>
+        <view class="data-row">
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.kdRatio}}</text>
+            <text class="dr-label">K/D</text>
+          </view>
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.avgDamage}}</text>
+            <text class="dr-label">场均伤害</text>
+          </view>
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.roundsPlayed}}</text>
+            <text class="dr-label">场次</text>
+          </view>
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.wins}}</text>
+            <text class="dr-label">吃鸡</text>
+          </view>
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.winRate}}</text>
+            <text class="dr-label">胜率</text>
+          </view>
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.avgKills}}</text>
+            <text class="dr-label">场均击杀</text>
+          </view>
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.kills}}</text>
+            <text class="dr-label">总击杀</text>
+          </view>
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.deaths}}</text>
+            <text class="dr-label">总死亡</text>
+          </view>
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.assists}}</text>
+            <text class="dr-label">助攻</text>
+          </view>
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.damageDealt}}</text>
+            <text class="dr-label">总伤害</text>
+          </view>
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.headshotKills}}</text>
+            <text class="dr-label">爆头</text>
+          </view>
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.longestKill}}</text>
+            <text class="dr-label">最远击杀</text>
+          </view>
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.DBNOs}}</text>
+            <text class="dr-label">击倒</text>
+          </view>
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.revives}}</text>
+            <text class="dr-label">救援</text>
+          </view>
+          <view class="dr-item">
+            <text class="dr-value">{{currentModeData.top10s}}</text>
+            <text class="dr-label">前10</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 空数据 -->
+      <view class="empty-data" wx:if="{{!currentModeData && !seasonLoading}}">
+        <text>该赛季暂无比赛数据</text>
+      </view>
+
+      <!-- 查看历史比赛 -->
+      <view class="action-bar" wx:if="{{matchIds.length > 0}}">
+        <view class="btn-primary action-btn" bindtap="onViewMatches">
+          查看历史比赛
+        </view>
+      </view>
+    </block>
+  </block>
+</view>

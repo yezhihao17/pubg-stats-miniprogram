@@ -1,0 +1,17 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/stats/stats",
+    "pages/matches/matches",
+    "pages/match-detail/match-detail"
+  ],
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "PUBG 战绩查询",
+    "navigationBarBackgroundColor": "#1a1a2e",
+    "backgroundColor": "#0f0f23"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

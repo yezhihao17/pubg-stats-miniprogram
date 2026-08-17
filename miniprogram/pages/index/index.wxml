@@ -1,0 +1,127 @@
+<!-- pages/index/index.wxml -->
+<view class="container">
+  <!-- 标题区域 -->
+  <view class="header">
+    <view class="logo-placeholder">PUBG</view>
+    <text class="title">PUBG 战绩查询</text>
+    <text class="subtitle">输入玩家昵称，查询赛季战绩与比赛数据</text>
+  </view>
+
+  <!-- 搜索表单 -->
+  <view class="search-card card">
+    <!-- 平台选择 -->
+    <view class="form-group">
+      <text class="form-label">选择平台</text>
+      <view class="platform-selector">
+        <view
+          class="platform-option {{platform === 'steam' ? 'active' : ''}}"
+          data-platform="steam"
+          bindtap="onSelectPlatform"
+        >
+          <text class="platform-icon">🖥️</text>
+          <text>Steam</text>
+        </view>
+        <view
+          class="platform-option {{platform === 'kakao' ? 'active' : ''}}"
+          data-platform="kakao"
+          bindtap="onSelectPlatform"
+        >
+          <text class="platform-icon">🟡</text>
+          <text>Kakao</text>
+        </view>
+        <view
+          class="platform-option {{platform === 'xbox' ? 'active' : ''}}"
+          data-platform="xbox"
+          bindtap="onSelectPlatform"
+        >
+          <text class="platform-icon">🎮</text>
+          <text>Xbox</text>
+        </view>
+        <view
+          class="platform-option {{platform === 'psn' ? 'active' : ''}}"
+          data-platform="psn"
+          bindtap="onSelectPlatform"
+        >
+          <text class="platform-icon">🎮</text>
+          <text>PSN</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 昵称输入 -->
+    <view class="form-group">
+      <text class="form-label">玩家昵称</text>
+      <view class="input-group">
+        <input
+          class="search-input"
+          placeholder="输入 PUBG 玩家昵称..."
+          value="{{playerName}}"
+          bindinput="onInputName"
+          maxlength="50"
+          confirm-type="search"
+          bindconfirm="onSearch"
+        />
+        <view
+          class="search-btn"
+          bindtap="onSearch"
+          data-loading="{{searching}}"
+        >
+          {{searching ? '搜索中...' : '查询'}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 历史搜索记录 -->
+  <view class="history-section" wx:if="{{searchHistory.length > 0}}">
+    <view class="history-header">
+      <text class="section-title">最近搜索</text>
+      <text class="clear-btn" bindtap="onClearHistory">清除</text>
+    </view>
+    <view class="history-list">
+      <view
+        class="history-tag"
+        wx:for="{{searchHistory}}"
+        wx:key="playerId"
+        data-index="{{index}}"
+        bindtap="onHistoryTap"
+      >
+        <text>{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索结果 -->
+  <view class="result-section" wx:if="{{players.length > 0}}">
+    <text class="section-title">搜索结果</text>
+    <view
+      class="player-card card"
+      wx:for="{{players}}"
+      wx:key="id"
+      data-index="{{index}}"
+      bindtap="onSelectPlayer"
+    >
+      <view class="player-info">
+        <view class="player-avatar">
+          <text class="avatar-text">{{item.initial}}</text>
+        </view>
+        <view class="player-detail">
+          <text class="player-name">{{item.name}}</text>
+        </view>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:elif="{{searched && players.length == 0}}">
+    <text class="empty-icon">😕</text>
+    <text class="empty-text">未找到该玩家</text>
+    <text class="empty-hint">请检查昵称和平台是否正确</text>
+  </view>
+
+  <!-- 错误提示 -->
+  <view class="error-toast" wx:if="{{error}}">
+    <text>{{error}}</text>
+  </view>
+</view>

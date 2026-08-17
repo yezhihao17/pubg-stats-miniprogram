@@ -1,0 +1,103 @@
+<!-- ============================================ -->
+<!-- 历史比赛列表 — 按 Designer 新设计             -->
+<!-- ============================================ -->
+<view class="container">
+  <view class="loading" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text>加载比赛数据...</text>
+  </view>
+
+  <view class="error-toast" wx:if="{{error}}">
+    <text>{{error}}</text>
+  </view>
+
+  <block wx:if="{{!loading}}">
+    <!-- 页面标题 -->
+    <view class="page-header">
+      <text class="page-title">{{playerName}} 的比赛</text>
+      <text class="page-count">共 {{matchTotal}} 场</text>
+    </view>
+
+    <!-- 筛选 Tab -->
+    <view class="filter-tabs">
+      <view class="filter-tab {{filterTab === 'all' ? 'active' : ''}}" data-tab="all" bindtap="onFilterChange">全部</view>
+      <view class="filter-tab {{filterTab === 'normal' ? 'active' : ''}}" data-tab="normal" bindtap="onFilterChange">🎯 匹配</view>
+      <view class="filter-tab {{filterTab === 'ranked' ? 'active' : ''}}" data-tab="ranked" bindtap="onFilterChange">🏆 排位</view>
+    </view>
+
+    <!-- 比赛列表 -->
+    <view class="match-list" wx:if="{{filteredMatchList.length > 0}}">
+      <view
+        class="match-card {{item.isWin ? 'won' : 'lost'}}"
+        wx:for="{{filteredMatchList}}"
+        wx:key="id"
+        data-index="{{index}}"
+        bindtap="onViewMatchDetail"
+      >
+        <!-- Row 1: 模式 + 标签 + 地图 -->
+        <view class="match-top-row">
+          <text class="match-mode">{{item.modeName}}</text>
+          <text class="match-type-tag {{item.isRanked ? 'ranked' : 'casual'}}">{{item.isRanked ? '排位' : '匹配'}}</text>
+          <text class="match-map">{{item.mapName}}</text>
+        </view>
+
+        <!-- Row 2: 时间 + 时长 -->
+        <view class="match-meta-row">
+          <text>{{item.timeAgo}}</text>
+          <text class="dot">·</text>
+          <text>时长 {{item.durationStr}}</text>
+          <text class="dot" wx:if="{{item.isWin}}">·</text>
+          <text class="chicken-text" wx:if="{{item.isWin}}">🏆 吃鸡</text>
+        </view>
+
+        <!-- Row 3: 击杀 + 排名 + 辅助数据 -->
+        <view class="match-stats-row">
+          <view class="match-kills">
+            <text class="kills-number">{{item.kills}}</text>
+            <text class="kills-label">击杀</text>
+          </view>
+          <view class="match-rank">
+            <text class="rank-number {{item.isWin ? 'gold' : item.killPlace <= 10 ? 'green' : 'red'}}">#{{item.killPlace}}</text>
+            <text class="rank-label">排名</text>
+          </view>
+          <view class="match-secondary-stats">
+            <view class="stat-item">
+              <text class="stat-value">{{item.assists}}</text>
+              <text class="stat-label">助攻</text>
+            </view>
+            <view class="stat-item">
+              <text class="stat-value">{{item.damageStr}}</text>
+              <text class="stat-label">伤害</text>
+            </view>
+            <view class="stat-item">
+              <text class="stat-value">{{item.survivalStr}}</text>
+              <text class="stat-label">存活</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- Row 4: 徽章 -->
+        <view class="match-badges">
+          <text class="match-badge chicken" wx:if="{{item.isWin}}">🏆 大吉大利，今晚吃鸡</text>
+          <text class="match-badge mvp" wx:if="{{item.isMVP}}">MVP</text>
+          <text class="match-badge medic" wx:if="{{item.isMedic}}">医疗兵</text>
+          <text class="match-badge carry" wx:if="{{item.isCarry}}">躺赢</text>
+          <text class="match-badge dropbox" wx:if="{{item.isDropBox}}">落地成盒</text>
+          <text class="match-badge top10" wx:if="{{!item.isWin && item.killPlace <= 10}}">前10</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:elif="{{matchList.length === 0}}">
+      <text class="empty-icon">📊</text>
+      <text class="empty-text">暂无比赛数据</text>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{!loading && hasMore && filteredMatchList.length > 0}}" bindtap="onLoadMore">
+      <view class="loading-spinner" wx:if="{{loadingMore}}"></view>
+      <text>{{loadingMore ? '加载中...' : '加载更多比赛'}}</text>
+    </view>
+  </block>
+</view>

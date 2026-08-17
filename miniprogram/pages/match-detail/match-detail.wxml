@@ -1,0 +1,120 @@
+<!-- ============================================ -->
+<!-- 单场比赛详情 — 队伍排名列表                   -->
+<!-- 严格按设计稿 v6.2 实现                       -->
+<!-- ============================================ -->
+<view class="container">
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text>加载比赛详情...</text>
+  </view>
+
+  <!-- 错误提示 -->
+  <view class="error-toast" wx:if="{{error}}">
+    <text>{{error}}</text>
+  </view>
+
+  <block wx:if="{{!loading && matchInfo}}">
+    <!-- ========== 页面头部 ========== -->
+    <view class="md-header">
+      <view class="md-header-info">
+        <text class="md-header-title">{{matchInfo.modeLabel}}</text>
+        <text class="md-header-sub">{{matchInfo.mapLabel}} · {{matchInfo.timeStr}} · {{matchInfo.durationStr}}</text>
+      </view>
+    </view>
+
+    <!-- ========== 比赛信息条 ========== -->
+    <view class="md-info-bar">
+      <view class="md-info-item">
+        <text class="md-info-label">总队伍</text>
+        <text class="md-info-value">{{matchInfo.totalTeams}}</text>
+      </view>
+      <view class="md-info-item">
+        <text class="md-info-label">总人数</text>
+        <text class="md-info-value">{{matchInfo.totalPlayers}}</text>
+      </view>
+      <view class="md-info-item">
+        <text class="md-info-label">时长</text>
+        <text class="md-info-value">{{matchInfo.durationStr}}</text>
+      </view>
+      <view class="md-info-item">
+        <text class="md-info-label">地图</text>
+        <text class="md-info-value">{{matchInfo.mapLabel}}</text>
+      </view>
+    </view>
+
+    <!-- ========== 我的队伍（置顶，红色边框） ========== -->
+    <view class="team-card my-team" wx:if="{{myTeam}}">
+      <view class="team-header">
+        <view class="team-rank {{myTeam.won ? 'win' : 'default'}}">#{{myTeam.rank}}</view>
+        <text class="team-kills">队伍击杀 <text class="team-total-kills">{{myTeam.teamKills}}</text></text>
+      </view>
+
+      <!-- 表头 -->
+      <view class="member-header">
+        <text class="mh-name">玩家</text>
+        <text class="mh-stat">评级</text>
+        <text class="mh-stat">击杀/击倒</text>
+        <text class="mh-stat">伤害</text>
+        <text class="mh-stat">时长</text>
+      </view>
+
+      <!-- 队员列表 -->
+      <view class="member-row" wx:for="{{myTeam.members}}" wx:key="id" wx:for-item="member">
+        <view class="member-left">
+          <text class="member-name {{member.isSelf ? 'me' : ''}}">{{member.name}}<text class="player-badge mvp" wx:if="{{member.isMVP}}">MVP</text><text class="player-badge medic" wx:if="{{member.isMedic}}">医</text><text class="player-badge carry" wx:if="{{member.isCarry}}">躺</text><text class="player-badge dropbox" wx:if="{{member.isDropBox}}">盒</text></text>
+          <view class="damage-track">
+            <view class="damage-fill {{member.isMaxDamage ? 'max' : ''}}" style="width:{{member.damagePct}}%"></view>
+          </view>
+        </view>
+        <view class="member-stats">
+          <text class="member-stat">{{member.rating}}</text>
+          <text class="member-stat">{{member.killsStr}}</text>
+          <text class="member-stat">{{member.damageStr}}</text>
+          <text class="member-stat">{{member.survivalStr}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- ========== 其他队伍 ========== -->
+    <view class="section-label">其他队伍（按排名）</view>
+
+    <view
+      class="team-card"
+      wx:for="{{otherTeams}}"
+      wx:key="teamId"
+      wx:for-item="team"
+    >
+      <view class="team-header">
+        <view class="team-rank 
+          {{team.rank === 1 ? 'gold' : team.rank === 2 ? 'silver' : team.rank === 3 ? 'bronze' : 'default'}}
+        ">#{{team.rank}}</view>
+        <text class="team-kills">队伍击杀 <text class="team-total-kills">{{team.teamKills}}</text></text>
+      </view>
+
+      <view class="member-header">
+        <text class="mh-name">玩家</text>
+        <text class="mh-stat">评级</text>
+        <text class="mh-stat">击杀/击倒</text>
+        <text class="mh-stat">伤害</text>
+        <text class="mh-stat">时长</text>
+      </view>
+
+      <view class="member-row" wx:for="{{team.members}}" wx:key="id" wx:for-item="member">
+        <view class="member-left">
+          <text class="member-name">{{member.name}}<text class="player-badge mvp" wx:if="{{member.isMVP}}">MVP</text><text class="player-badge medic" wx:if="{{member.isMedic}}">医</text><text class="player-badge carry" wx:if="{{member.isCarry}}">躺</text><text class="player-badge dropbox" wx:if="{{member.isDropBox}}">盒</text></text>
+          <view class="damage-track">
+            <view class="damage-fill {{member.isMaxDamage ? 'max' : ''}}" style="width:{{member.damagePct}}%"></view>
+          </view>
+        </view>
+        <view class="member-stats">
+          <text class="member-stat">{{member.rating}}</text>
+          <text class="member-stat">{{member.killsStr}}</text>
+          <text class="member-stat">{{member.damageStr}}</text>
+          <text class="member-stat">{{member.survivalStr}}</text>
+        </view>
+      </view>
+    </view>
+
+  </block>
+</view>

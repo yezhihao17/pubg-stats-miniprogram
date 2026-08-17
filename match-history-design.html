@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PUBG 历史比赛 - 重新设计原型</title>
+<style>
+  /* ===== Reset & Base ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== Phone Frame ===== */
+  .phone-frame {
+    width: 375px;
+    max-width: 100%;
+    min-height: 100vh;
+    background: #1a1a2e;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ===== Status Bar ===== */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px 8px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.3px;
+  }
+  .status-bar .time { font-weight: 600; }
+  .status-icons { display: flex; gap: 6px; align-items: center; }
+  .status-icons span { font-size: 11px; }
+
+  /* ===== Header ===== */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 20px 16px;
+  }
+  .page-header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+  .page-header .back-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #2a2a4a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+    cursor: default;
+  }
+  .page-header .filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 14px;
+    border-radius: 16px;
+    background: #2a2a4a;
+    color: #aaa;
+    font-size: 12px;
+    cursor: default;
+  }
+
+  /* ===== Filter Tabs ===== */
+  .filter-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .filter-tabs::-webkit-scrollbar { display: none; }
+  .filter-tab {
+    flex-shrink: 0;
+    padding: 6px 16px;
+    border-radius: 20px;
+    background: #2a2a4a;
+    color: #888;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: default;
+    transition: all 0.2s;
+  }
+  .filter-tab.active {
+    background: #e94560;
+    color: #fff;
+  }
+
+  /* ===== Summary Stats ===== */
+  .summary-stats {
+    display: flex;
+    justify-content: space-around;
+    padding: 14px 20px 18px;
+    margin: 0 16px 8px;
+    background: #16213e;
+    border-radius: 12px;
+    border: 1px solid #2a2a4a;
+  }
+  .summary-item {
+    text-align: center;
+  }
+  .summary-item .value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .summary-item .label {
+    font-size: 10px;
+    color: #666;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+  }
+  .summary-item .value.kills-value { color: #e94560; }
+  .summary-item .value.win-value { color: #ffd700; }
+  .summary-item .value.top10-value { color: #4caf50; }
+
+  /* ===== Match List ===== */
+  .match-list {
+    padding: 0 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ===== Match Card ===== */
+  .match-card {
+    background: #16213e;
+    border-radius: 14px;
+    border: 1px solid #2a2a4a;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+  }
+  /* Top-left accent bar for chicken dinner */
+  .match-card.won::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: #ffd700;
+    border-radius: 4px 0 0 4px;
+  }
+  .match-card.lost::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: #e94560;
+    border-radius: 4px 0 0 4px;
+  }
+
+  /* ------ Row 1: Mode + Tags + Map ------ */
+  .match-top-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .match-mode {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .match-type-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.5px;
+  }
+  .match-type-tag.ranked {
+    background: rgba(233, 69, 96, 0.2);
+    color: #e94560;
+    border: 1px solid rgba(233, 69, 96, 0.3);
+  }
+  .match-type-tag.casual {
+    background: rgba(76, 175, 80, 0.15);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+  }
+  .match-map {
+    font-size: 12px;
+    color: #888;
+    margin-left: auto;
+  }
+
+  /* ------ Row 2: Time + Duration ------ */
+  .match-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 11px;
+    color: #666;
+  }
+  .match-meta-row .dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #444;
+  }
+
+  /* ------ Row 3: Kills + Rank + Stats ------ */
+  .match-stats-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .match-kills {
+    flex-shrink: 0;
+    text-align: center;
+    min-width: 64px;
+  }
+  .match-kills .kills-number {
+    font-size: 32px;
+    font-weight: 800;
+    color: #e94560;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .match-kills .kills-label {
+    font-size: 10px;
+    color: #666;
+    letter-spacing: 1px;
+    margin-top: 1px;
+  }
+
+  .match-rank {
+    flex-shrink: 0;
+    text-align: center;
+    min-width: 48px;
+  }
+  .match-rank .rank-number {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .match-rank .rank-number.gold { color: #ffd700; }
+  .match-rank .rank-number.green { color: #4caf50; }
+  .match-rank .rank-number.red { color: #e94560; }
+  .match-rank .rank-number.white { color: #ccc; }
+  .match-rank .rank-label {
+    font-size: 10px;
+    color: #666;
+    letter-spacing: 1px;
+    margin-top: 1px;
+  }
+
+  .match-secondary-stats {
+    display: flex;
+    gap: 14px;
+    margin-left: auto;
+  }
+  .match-secondary-stats .stat-item {
+    text-align: center;
+  }
+  .match-secondary-stats .stat-item .stat-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ccc;
+  }
+  .match-secondary-stats .stat-item .stat-label {
+    font-size: 9px;
+    color: #555;
+    letter-spacing: 0.5px;
+    margin-top: 1px;
+  }
+
+  /* ------ Row 4: Badges (optional) ------ */
+  .match-badges {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #2a2a4a;
+  }
+  .match-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .match-badge.chicken {
+    background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.1));
+    color: #ffd700;
+    border: 1px solid rgba(255,215,0,0.3);
+  }
+  .match-badge.top10 {
+    background: rgba(76,175,80,0.12);
+    color: #4caf50;
+    border: 1px solid rgba(76,175,80,0.25);
+  }
+  .match-badge.mvp {
+    background: rgba(233,69,96,0.15);
+    color: #e94560;
+    border: 1px solid rgba(233,69,96,0.3);
+  }
+  .match-badge.death {
+    background: rgba(120,120,120,0.15);
+    color: #888;
+    border: 1px solid rgba(120,120,120,0.25);
+  }
+
+  /* ===== Loading Spinner ===== */
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+  }
+  .spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid #2a2a4a;
+    border-top-color: #e94560;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===== Award Badge Icon ===== */
+  .crown-icon, .skull-icon {
+    font-size: 14px;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 400px) {
+    .phone-frame { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <div class="status-icons">
+      <span>📶</span>
+      <span>📶</span>
+      <span>🔋</span>
+    </div>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="back-btn">←</div>
+    <h1>历史比赛</h1>
+    <div class="filter-btn">📅 全部赛季 ▾</div>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <span class="filter-tab active">全部</span>
+    <span class="filter-tab">四排</span>
+    <span class="filter-tab">双排</span>
+    <span class="filter-tab">单排</span>
+    <span class="filter-tab">排位</span>
+    <span class="filter-tab">匹配</span>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="summary-stats">
+    <div class="summary-item">
+      <div class="value">72</div>
+      <div class="label">比赛场次</div>
+    </div>
+    <div class="summary-item">
+      <div class="value kills-value">3.2</div>
+      <div class="label">场均击杀</div>
+    </div>
+    <div class="summary-item">
+      <div class="value win-value">8</div>
+      <div class="label">吃鸡</div>
+    </div>
+    <div class="summary-item">
+      <div class="value top10-value">32</div>
+      <div class="label">前10</div>
+    </div>
+  </div>
+
+  <!-- Match List -->
+  <div class="match-list">
+
+    <!-- ===== Match 1: Chicken Dinner ===== -->
+    <div class="match-card won">
+      <div class="match-top-row">
+        <span class="match-mode">四排</span>
+        <span class="match-type-tag ranked">排位</span>
+        <span class="match-map">🏝️ 艾伦格</span>
+      </div>
+      <div class="match-meta-row">
+        <span>2小时前</span>
+        <span class="dot"></span>
+        <span>时长 32:18</span>
+        <span class="dot"></span>
+        <span>🏆 吃鸡</span>
+      </div>
+      <div class="match-stats-row">
+        <div class="match-kills">
+          <div class="kills-number">12</div>
+          <div class="kills-label">击杀</div>
+        </div>
+        <div class="match-rank">
+          <div class="rank-number gold">#1</div>
+          <div class="rank-label">排名</div>
+        </div>
+        <div class="match-secondary-stats">
+          <div class="stat-item">
+            <div class="stat-value">4</div>
+            <div class="stat-label">助攻</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">1,560</div>
+            <div class="stat-label">伤害</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">28:18</div>
+            <div class="stat-label">存活</div>
+          </div>
+        </div>
+      </div>
+      <div class="match-badges">
+        <span class="match-badge chicken">🏆 大吉大利，今晚吃鸡</span>
+        <span class="match-badge mvp">⚡ MVP · 12 击杀</span>
+      </div>
+    </div>
+
+    <!-- ===== Match 2: Top 10 ===== -->
+    <div class="match-card">
+      <div class="match-top-row">
+        <span class="match-mode">四排</span>
+        <span class="match-type-tag casual">匹配</span>
+        <span class="match-map">🏜️ 米拉玛</span>
+      </div>
+      <div class="match-meta-row">
+        <span>1小时前</span>
+        <span class="dot"></span>
+        <span>时长 28:45</span>
+      </div>
+      <div class="match-stats-row">
+        <div class="match-kills">
+          <div class="kills-number">5</div>
+          <div class="kills-label">击杀</div>
+        </div>
+        <div class="match-rank">
+          <div class="rank-number green">#8</div>
+          <div class="rank-label">排名</div>
+        </div>
+        <div class="match-secondary-stats">
+          <div class="stat-item">
+            <div class="stat-value">2</div>
+            <div class="stat-label">助攻</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">890</div>
+            <div class="stat-label">伤害</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">24:02</div>
+            <div class="stat-label">存活</div>
+          </div>
+        </div>
+      </div>
+      <div class="match-badges">
+        <span class="match-badge top10">🎯 前 10</span>
+      </div>
+    </div>
+
+    <!-- ===== Match 3: Early Elimination ===== -->
+    <div class="match-card lost">
+      <div class="match-top-row">
+        <span class="match-mode">双排</span>
+        <span class="match-type-tag ranked">排位</span>
+        <span class="match-map">🌴 萨诺</span>
+      </div>
+      <div class="match-meta-row">
+        <span>3小时前</span>
+        <span class="dot"></span>
+        <span>时长 18:22</span>
+      </div>
+      <div class="match-stats-row">
+        <div class="match-kills">
+          <div class="kills-number">0</div>
+          <div class="kills-label">击杀</div>
+        </div>
+        <div class="match-rank">
+          <div class="rank-number red">#28</div>
+          <div class="rank-label">排名</div>
+        </div>
+        <div class="match-secondary-stats">
+          <div class="stat-item">
+            <div class="stat-value">0</div>
+            <div class="stat-label">助攻</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">120</div>
+            <div class="stat-label">伤害</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">08:15</div>
+            <div class="stat-label">存活</div>
+          </div>
+        </div>
+      </div>
+      <div class="match-badges">
+        <span class="match-badge death">💀 落地成盒</span>
+      </div>
+    </div>
+
+    <!-- ===== Match 4: Solo ===== -->
+    <div class="match-card">
+      <div class="match-top-row">
+        <span class="match-mode">单排</span>
+        <span class="match-type-tag casual">匹配</span>
+        <span class="match-map">❄️ 维寒迪</span>
+      </div>
+      <div class="match-meta-row">
+        <span>昨天</span>
+        <span class="dot"></span>
+        <span>时长 25:10</span>
+      </div>
+      <div class="match-stats-row">
+        <div class="match-kills">
+          <div class="kills-number">8</div>
+          <div class="kills-label">击杀</div>
+        </div>
+        <div class="match-rank">
+          <div class="rank-number green">#6</div>
+          <div class="rank-label">排名</div>
+        </div>
+        <div class="match-secondary-stats">
+          <div class="stat-item">
+            <div class="stat-value">—</div>
+            <div class="stat-label">助攻</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">1,240</div>
+            <div class="stat-label">伤害</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">25:10</div>
+            <div class="stat-label">存活</div>
+          </div>
+        </div>
+      </div>
+      <div class="match-badges">
+        <span class="match-badge top10">🎯 前 10</span>
+      </div>
+    </div>
+
+    <!-- ===== Match 5: Squad Casual ===== -->
+    <div class="match-card lost">
+      <div class="match-top-row">
+        <span class="match-mode">四排</span>
+        <span class="match-type-tag casual">匹配</span>
+        <span class="match-map">🏝️ 艾伦格</span>
+      </div>
+      <div class="match-meta-row">
+        <span>昨天</span>
+        <span class="dot"></span>
+        <span>时长 12:05</span>
+      </div>
+      <div class="match-stats-row">
+        <div class="match-kills">
+          <div class="kills-number">2</div>
+          <div class="kills-label">击杀</div>
+        </div>
+        <div class="match-rank">
+          <div class="rank-number white">#42</div>
+          <div class="rank-label">排名</div>
+        </div>
+        <div class="match-secondary-stats">
+          <div class="stat-item">
+            <div class="stat-value">1</div>
+            <div class="stat-label">助攻</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">340</div>
+            <div class="stat-label">伤害</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">08:30</div>
+            <div class="stat-label">存活</div>
+          </div>
+        </div>
+      </div>
+      <div class="match-badges">
+        <span class="match-badge death">💀 落地成盒</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Loading More -->
+  <div class="loading-spinner">
+    <div class="spinner"></div>
+  </div>
+
+</div>
+
+</body>
+</html>
