@@ -23,7 +23,7 @@ module.exports = {
 
   // 服务器配置
   server: {
-    port: parseInt(process.env.PORT || '3000', 10),
+    port: parseInt(process.env.PORT || '3000', 10) || 3000,
   },
 
   // 请求限流
