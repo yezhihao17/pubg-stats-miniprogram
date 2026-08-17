@@ -1,4 +1,4 @@
-require('dotenv').config();
+try { require('dotenv').config(); } catch (e) { /* Railway 无 .env 文件 */ }
 
 module.exports = {
   // PUBG API 配置

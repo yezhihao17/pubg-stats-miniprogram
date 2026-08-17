@@ -29,6 +29,11 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// 根路径
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', service: 'PUBG Stats API' });
+});
+
 // 路由
 app.use('/api/players', playersRouter);
 app.use('/api/seasons', seasonsRouter);
