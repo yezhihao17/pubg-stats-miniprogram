@@ -36,7 +36,7 @@ app.use('/api/matches', matchesRouter);
 
 // 启动服务器
 const PORT = config.server.port;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n🎯 PUBG 战绩查询 API 服务已启动`);
   console.log(`   http://localhost:${PORT}`);
   console.log(`   健康检查: http://localhost:${PORT}/api/health\n`);
