@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>空投战术箱</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;
+  background:#fff;color:#111;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-height:100vh;padding:40px
+}
+.stage{
+  display:flex;gap:48px;align-items:center;flex-wrap:wrap;
+  justify-content:center;margin:40px 0
+}
+.box{
+  width:140px;height:140px;display:flex;
+  align-items:center;justify-content:center;border-radius:6px
+}
+.d{background:#0a0e1a}
+.l{background:#f5f5f7;border:1px solid #e8e8ec}
+.cr{background:#e94560}
+.lbl{font-size:11px;color:#999;letter-spacing:2px;text-align:center;margin-top:14px}
+.cap{font-size:13px;color:#666;letter-spacing:1px;text-align:center;line-height:2}
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <div>
+    <div class="box d">
+      <svg width="88" height="88" viewBox="0 0 88 88">
+        <rect x="6" y="14" width="76" height="68" rx="8" fill="#e94560"/>
+        <rect x="6" y="14" width="76" height="20" rx="8" fill="#c0392b"/>
+        <rect x="6" y="26" width="76" height="6" fill="#e94560"/>
+        <rect x="36" y="38" width="16" height="14" rx="1" fill="#ffd700"/>
+        <line x1="20" y1="62" x2="68" y2="62" stroke="#0a0e1a" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+      </svg>
+    </div>
+    <div class="lbl">深底</div>
+  </div>
+
+  <div>
+    <div class="box l">
+      <svg width="88" height="88" viewBox="0 0 88 88">
+        <rect x="6" y="14" width="76" height="68" rx="8" fill="#e94560"/>
+        <rect x="6" y="14" width="76" height="20" rx="8" fill="#c0392b"/>
+        <rect x="6" y="26" width="76" height="6" fill="#e94560"/>
+        <rect x="36" y="38" width="16" height="14" rx="1" fill="#ffd700"/>
+        <line x1="20" y1="62" x2="68" y2="62" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+      </svg>
+    </div>
+    <div class="lbl">浅底</div>
+  </div>
+
+  <div>
+    <div class="box cr">
+      <svg width="88" height="88" viewBox="0 0 88 88">
+        <rect x="6" y="14" width="76" height="68" rx="8" fill="#fff"/>
+        <rect x="6" y="14" width="76" height="20" rx="8" fill="#fff" opacity="0.85"/>
+        <rect x="36" y="38" width="16" height="14" rx="1" fill="#ffd700"/>
+        <line x1="20" y1="62" x2="68" y2="62" stroke="#0a0e1a" stroke-width="2" stroke-linecap="round" opacity="0.25"/>
+      </svg>
+    </div>
+    <div class="lbl">血红底</div>
+  </div>
+
+</div>
+
+<div class="cap">
+  空投战术箱　·　AIRDROP TACTICAL BOX<br>
+  <span style="color:#bbb">一个血红箱子，一个金色搭扣，一条开盖缝。就这些。</span>
+</div>
+
+</body>
+</html>

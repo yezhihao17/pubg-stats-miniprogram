@@ -104,20 +104,14 @@ Page({
         const allParticipants = match.participants || [];
         const teamMaxKills = playerStats?.teamMaxKills || 0;
         const maxHeals = Math.max(...allParticipants.map(p => p.heals || 0), 0);
-        // MVP：吃鸡队伍有击杀→本队击杀最高(伤害平局)；无击杀→全场击杀最高
+        // MVP：吃鸡队伍内击杀最高者
         let isMVP = false;
         if (displayRank === 1) {
           const winningTeam = allParticipants.filter(p => (p.teamRank || 0) === 1);
-          const teamHasKills = winningTeam.some(p => p.kills > 0);
-          if (teamHasKills) {
-            winningTeam.sort((a, b) => b.kills - a.kills || b.damageDealt - a.damageDealt);
-            isMVP = playerStats && playerStats.name === winningTeam[0].name;
-          } else {
-            const sorted = [...allParticipants].sort((a, b) => b.kills - a.kills || b.damageDealt - a.damageDealt);
-            isMVP = playerStats && playerStats.name === sorted[0].name && sorted[0].kills > 0;
-          }
+          winningTeam.sort((a, b) => b.kills - a.kills || b.damageDealt - a.damageDealt);
+          isMVP = playerStats && playerStats.kills > 0 && playerStats.name === winningTeam[0].name;
         }
-        const isMedic = heals >= 200 && heals >= maxHeals && maxHeals > 0;
+        const isMedic = heals > 0 && heals >= maxHeals;
         const isSolo = mode.includes('solo') && !mode.includes('duo') && !mode.includes('squad');
         const isDuo = mode.includes('duo');
         const dropBoxRank = isSolo ? 90 : isDuo ? 45 : 22;
