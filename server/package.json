@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "PUBG 战绩查询后端代理服务",
   "main": "src/index.js",
+  "engines": {
+    "node": "18.x || 20.x"
+  },
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js"
